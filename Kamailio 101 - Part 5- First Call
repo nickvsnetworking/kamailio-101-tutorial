@@ -625,29 +625,4 @@ failure_route[MANAGE_FAILURE] {
 
 	if (t_is_canceled()) exit;
 
-#!ifdef WITH_BLOCK3XX
-	# block call redirect based on 3xx replies.
-	if (t_check_status("3[0-9][0-9]")) {
-		t_reply("404","Not found");
-		exit;
-	}
-#!endif
-
-#!ifdef WITH_BLOCK401407
-	# block call redirect based on 401, 407 replies.
-	if (t_check_status("401|407")) {
-		t_reply("404","Not found");
-		exit;
-	}
-#!endif
-
-#!ifdef WITH_VOICEMAIL
-	# serial forking
-	# - route to voicemail on busy or no answer (timeout)
-	if (t_check_status("486|408")) {
-		$du = $null;
-		route(TOVOICEMAIL);
-		exit;
-	}
-#!endif
 }
