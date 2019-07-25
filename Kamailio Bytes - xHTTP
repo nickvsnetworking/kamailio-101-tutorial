@@ -475,7 +475,7 @@ request_route {
 
 route[SEND_MESSAGE]{
         $uac_req(method)="MESSAGE";
-        $uac_req(ruri)="sip:192.168.3.227:5060";
+        $uac_req(ruri)="sip:10.0.1.5:5060";
         $uac_req(furi)="sip:nickvsnetworking.com";
         $uac_req(turi)="sip:thisphone";
         $uac_req(callid)=$(mb{s.md5});
