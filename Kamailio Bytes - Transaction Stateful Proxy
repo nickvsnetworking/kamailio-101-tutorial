@@ -1,0 +1,54 @@
+####### Routing Logic ########
+
+
+/* Main SIP request routing logic
+ * - processing of any incoming SIP request starts with this route
+ * - note: this is the same as route { ... } */
+request_route {
+
+        #Enable record_routing so we see the BYE / Re-INVITE etc
+        record_route();
+
+        #Handle Registrations in a dumb way so they don't messy our tests
+        if(is_method("REGISTER")){
+                sl_reply("200", "ok");
+                exit;
+        }
+
+
+
+                 #Append a header so we can see this was proxied in the SIP capture
+                append_hf("X-Proxied: You betcha\r\n");
+
+        if(is_method("INVITE")){
+                        #Createa  new AVP called "state_test_var" and set the value to "I remember"
+                        $avp(state_test_var) = "I remember";
+        }
+                #Let syslog know we've set the value and check it
+                xlog("for $rm the value of AVP \"state_test_var\" is $avp(state_test_var) ");
+
+                #Send to route[RELAY] routing block
+                route(RELAY);
+
+}
+
+route[RELAY]{
+
+        #Use reply route "OurReplyRoute" for responses for this transaction
+        t_on_reply("OurReplyRoute");
+
+        #Relay (aka Forward) the request
+        t_relay_to_udp("192.168.3.118", "5060");
+
+}
+
+onreply_route[OurReplyRoute] {
+        #On replies from route[RELAY]
+
+        #Check our AVP we set in the initial request
+        xlog("for $rs response the value of AVP \"state_test_var\" is $avp(state_test_var) ");
+
+        #Append a header so we can see this was proxied in the SIP capture
+        append_hf("X-Proxied: For the reply\r\n");
+
+}
