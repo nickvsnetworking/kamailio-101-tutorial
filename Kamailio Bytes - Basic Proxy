@@ -222,8 +222,6 @@ loadmodule "db_mysql.so"
 loadmodule "jsonrpcs.so"
 loadmodule "kex.so"
 loadmodule "corex.so"
-loadmodule "tm.so"
-loadmodule "tmx.so"
 loadmodule "sl.so"
 loadmodule "rr.so"
 loadmodule "pv.so"
@@ -236,7 +234,6 @@ loadmodule "xlog.so"
 loadmodule "sanity.so"
 loadmodule "ctl.so"
 loadmodule "cfg_rpc.so"
-loadmodule "acc.so"
 loadmodule "counters.so"
 
 #!ifdef WITH_AUTH
@@ -300,13 +297,6 @@ modparam("jsonrpcs", "pretty_format", 1)
 /* set the path to RPC unix socket control file */
 # modparam("ctl", "binrpc", "unix:/var/run/kamailio/kamailio_ctl")
 
-# ----- tm params -----
-# auto-discard branches from previous serial forking leg
-modparam("tm", "failure_reply_mode", 3)
-# default retransmission timeout: 30sec
-modparam("tm", "fr_timer", 30000)
-# default invite retransmission timeout after 1xx: 120sec
-modparam("tm", "fr_inv_timer", 120000)
 
 # ----- rr params -----
 # set next param to 1 to add value to ;lr param (helps with some UAs)
@@ -324,32 +314,6 @@ modparam("registrar", "method_filtering", 1)
 modparam("registrar", "max_expires", 3600)
 /* set it to 1 to enable GRUU */
 modparam("registrar", "gruu_enabled", 0)
-
-# ----- acc params -----
-/* what special events should be accounted ? */
-modparam("acc", "early_media", 0)
-modparam("acc", "report_ack", 0)
-modparam("acc", "report_cancels", 0)
-/* by default ww do not adjust the direct of the sequential requests.
- * if you enable this parameter, be sure the enable "append_fromtag"
- * in "rr" module */
-modparam("acc", "detect_direction", 0)
-/* account triggers (flags) */
-modparam("acc", "log_flag", FLT_ACC)
-modparam("acc", "log_missed_flag", FLT_ACCMISSED)
-modparam("acc", "log_extra",
-        "src_user=$fU;src_domain=$fd;src_ip=$si;"
-        "dst_ouser=$tU;dst_user=$rU;dst_domain=$rd")
-modparam("acc", "failed_transaction_flag", FLT_ACCFAILED)
-/* enhanced DB accounting */
-#!ifdef WITH_ACCDB
-modparam("acc", "db_flag", FLT_ACC)
-modparam("acc", "db_missed_flag", FLT_ACCMISSED)
-modparam("acc", "db_url", DBURL)
-modparam("acc", "db_extra",
-        "src_user=$fU;src_domain=$fd;src_ip=$si;"
-        "dst_ouser=$tU;dst_user=$rU;dst_domain=$rd")
-#!endif
 
 # ----- usrloc params -----
 /* enable DB persistency for location entries */
