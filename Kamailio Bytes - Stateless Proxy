@@ -430,24 +430,29 @@ request_route {
         }
 
 
-        #Append a header so we can see this was proxied in the SIP capture
-        append_hf("X-Proxied: You betcha\r\n");
+        if(is_method("INVITE")){
 
-        #Createa  new AVP called "state_test_var" and set the value to "I remember"
-        $avp(state_test_var) = "I remember";
+                 #Append a header so we can see this was proxied in the SIP capture
+                append_hf("X-Proxied: You betcha\r\n");
 
-        #Let syslog know we've set the value and check it
-        xlog("for $rm the value of AVP \"state_test_var\" is $avp(state_test_var) ");
 
-        #Forard to new IP
-        forward("192.168.3.118");
+                #Createa  new AVP called "state_test_var" and set the value to "I remember"
+                $avp(state_test_var) = "I remember";
+
+                #Let syslog know we've set the value and check it
+                xlog("for $rm the value of AVP \"state_test_var\" is $avp(state_test_var) ");
+
+                #Forard to new IP
+                forward("192.168.3.118");
+
+        }
 
 }
 
 onreply_route{
-        #Check our AVP we set in the intial request
+        #Check our AVP we set in the initial request
         xlog("for $rs response the value of AVP \"state_test_var\" is $avp(state_test_var) ");
 
-        #Append a ehader so we can see this was proxied in the SIP capture
+        #Append a header so we can see this was proxied in the SIP capture
         append_hf("X-Proxied: For the reply\r\n");
 }
