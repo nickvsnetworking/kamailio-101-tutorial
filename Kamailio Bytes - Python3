@@ -1,0 +1,31 @@
+## Kamailio - equivalent of routing blocks in Python
+import sys
+import Router.Logger as Logger
+import KSR as KSR
+
+# global function to instantiate a kamailio class object
+# -- executed when kamailio app_python module is initialized
+def mod_init():
+    KSR.info("===== from Python mod init\n");
+    return kamailio();
+
+
+# -- {start defining kamailio class}
+class kamailio:
+    def __init__(self):
+        KSR.info('===== kamailio.__init__\n');
+
+
+    # executed when kamailio child processes are initialized
+    def child_init(self, rank):
+        KSR.info('===== kamailio.child_init(%d)\n' % rank);
+        return 0;
+
+
+    # SIP request routing
+    # -- equivalent of request_route{}
+    def ksr_request_route(self, msg):
+        KSR.info("===== request - from kamailio python script\n");
+        KSR.info("===== method [%s] r-uri [%s]\n" % (KSR.pv.get("$rm"),KSR.pv.get("$ru")));
+
+
