@@ -1,0 +1,58 @@
+---
+- name: Configure Kamailio
+
+
+  hosts: kamailio
+  become: yes
+
+  vars:
+    kamailio_version: "53"
+    debian_sources_dir: "/etc/apt/sources.list.d"
+
+  tasks:
+
+
+
+    - name: Add keys for Kamailio repo
+      apt_key:
+        url: http://deb.kamailio.org/kamailiodebkey.gpg
+        state: present
+
+
+    - name: Add repo to sources.list
+      apt_repository:
+        repo: deb http://deb.kamailio.org/kamailio{{kamailio_version}} {{hostvars[inventory_hostname]['ansible_lsb']['codename']}} main
+                #The full list of Debian repos can be found at http://deb.kamailio.org/
+                #The version is based off the versions listed there and the release is based on the codename of the Debian / Ubuntu release.
+        state: present
+
+
+    - name: Copy Config Template
+                #Copies config from the template, fills in variables and uplaods to the server
+      template:
+        src: kamailio.cfg.j2
+        dest: /etc/kamailio/kamailio.cfg
+        owner: root
+        group: root
+        backup: yes
+      register: config_changed
+
+    - name: Install Kamailio
+                #Updates cache (apt-get update) and then installs Kamailio
+      apt:
+        name: kamailio
+        update_cache: yes
+        state: present
+      register: kamailio_installed_firstrun
+
+    - name: Restart Kamailio if config changed
+      service:
+       name: kamailio
+       state: restarted
+      when: config_changed.changed
+
+    - name: Start Kamailio if installed for the first time
+      service:
+       name: kamailio
+       state: started
+      when: kamailio_installed_firstrun.changed
