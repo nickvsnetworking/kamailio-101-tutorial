@@ -479,7 +479,9 @@ modparam("debugger", "log_level_name", "exec")
 loadmodule "uac.so"
 modparam("uac", "reg_contact_addr", "10.0.1.252:5060")
 modparam("uac", "reg_db_url", DBURL)
-
+modparam("uac","auth_username_avp","$avp(auser)")
+modparam("uac","auth_password_avp","$avp(apass)")
+modparam("uac","auth_realm_avp","$avp(arealm)")
 
 
 ####### Routing Logic ########
@@ -490,7 +492,7 @@ modparam("uac", "reg_db_url", DBURL)
  * - note: this is the same as route { ... } */
 request_route {
 	xlog("Incoming request");
-	$du = "sip:sip.yourcarrier.com:5060";
+	$du = "sip:sip.nickvsnetworking.com:5060";
 	if(is_method("INVITE")) {
 		t_on_failure("TRUNKAUTH");
 		t_relay();
@@ -500,23 +502,25 @@ request_route {
 		sl_reply("200", "Sure");
 		exit;
 	}else{
-		sl_reply("500", "Aw shoot");
+		sl_reply("500", "Aw shit");
 		exit;
 	}
 
 }
 
 failure_route[TRUNKAUTH] {
-
+    xlog("trunk auth");
     if (t_is_canceled()) {
         exit;
     }
+	xlog("Checking status code");
     if(t_check_status("401|407")) {
+	xlog("status code is valid auth challenge");
         $avp(auser) = "test";
         $avp(apass) = "test";
         uac_auth();
+	xlog("after uac_auth");
         t_relay();
         exit;
     }
 }
-
