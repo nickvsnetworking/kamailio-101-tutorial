@@ -1,0 +1,56 @@
+#!KAMAILIO
+
+####### Global Parameters #########
+
+debug=3
+log_stderror=yes
+fork=yes
+children=2
+
+memdbg=9
+memlog=9
+
+auto_aliases=no
+
+listen=udp:0.0.0.0:5060
+listen=tcp:0.0.0.0:5060
+listen=tcp:127.0.0.10:5080
+
+
+loadmodule "jsonrpcs.so"
+loadmodule "kex.so"
+loadmodule "tm.so"
+loadmodule "tmx.so"
+loadmodule "sl.so"
+loadmodule "pv.so"
+loadmodule "maxfwd.so"
+loadmodule "textops.so"
+loadmodule "xlog.so"
+loadmodule "ctl.so"
+loadmodule "debugger.so"
+loadmodule "pike.so"
+loadmodule "corex.so"
+loadmodule "sanity.so"
+loadmodule "enum.so"
+
+# ----------------- setting module-specific parameters ---------------
+
+# ----- debugger params -----
+modparam("debugger", "cfgtrace", 1)
+
+
+modparam("tm", "retr_timer1", 1000)
+
+tcp_accept_no_cl=yes
+modparam("enum", "domain_suffix", "e164.arpa.")
+request_route{
+	if(is_method("INVITE")){
+		enum_query();
+		xlog("Ran ENUM query");
+		xlog("To URI $tU");
+		forward();
+	}
+	if(is_method("REGISTER")){
+		sl_reply("200", "Sure, whatever man");
+	}
+}
